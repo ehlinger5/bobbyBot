@@ -1,7 +1,7 @@
 """
 Created: 01/15/2022
 Last Updated: 01/15/2022
-@author: Josh Ehlinger (Ehlien)
+@author: Josh Ehlinger (theEhlien)
 """
 
 import logging
