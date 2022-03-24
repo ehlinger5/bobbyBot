@@ -26,7 +26,7 @@ ACTIVE_CONF = {
     "MODERATOR_ROLE_ID": 0, # this will be updated on load based on the value from the server
     "MEMBER_ROLE_NAME": "Member",
     "MEMBER_ROLE_ID": 0, # this will be updated on load based on the value from the server
-    "PHRASES": ["Relateable","Unbelievable","Me too","Cry about it"]
+    "PHRASES": ["Relateable","Unbelievable","Me too","Cry about it","pog","pogn't","poggers","It do be like that","I agree","Yeah, me too","You know what? Me too","No :heart:","Yeah, same","I'm gonna commit violence","No respect","Do you know who I am?","Get a load of this guy","Hey, how you doin'?","Do I know you?","Have we met?"]
 }
 ####################
 
@@ -172,8 +172,37 @@ def main():
                     logging.warning(f'User {message.author} tried to use the randomphrase command without sufficient permissions')
                     await message.reply(f'This command can only be used by a user with the {ACTIVE_CONF["MEMBER_ROLE_NAME"]} role')
 
+            ###################################################################################################################
+            # Make check for 'randomphrase' command call - will reply with error when list is empty
+            ###################################################################################################################
+            if message.content != None and "addphrase" in message.content:
+                # do check for moderator role
+                canCall = False
+                if ACTIVE_CONF["MODERATOR_ROLE_ID"] == 0: # mod id is 0 - if member id is also 0, assume @everyone is alright - user with member role can also make call
+                    if ACTIVE_CONF["MEMBER_ROLE_ID"] == 0 or checkForUserRoles(message.author.roles, [int(ACTIVE_CONF["MEMBER_ROLE_ID"])]):
+                        canCall = True
+                elif checkForUserRoles(message.author.roles, [int(ACTIVE_CONF["MODERATOR_ROLE_ID"])]):
+                    canCall = True
+                if message.author.guild_permissions.administrator: # author is admin so they can make the call
+                    canCall = True
+
+                if canCall:
+                    newPhrase = addPhrase(message)
+                    if newPhrase == False:
+                        await message.reply("Something isn't right. Check your command again")
+                        await message.reply(f'Usage: {ACTIVE_CONF["BOT_PREFIX"]} addphrase [brand new phrase]')
+                    elif newPhrase == True:
+                        await message.reply(f'That phrase is already in the list of available Bobby phrases')
+                    else:
+                        await message.reply(f'"{newPhrase}" was added to the list of available Bobby phrases')
+                else:
+                    logging.warning(f'User {message.author} tried to use the addphrase command without sufficient permissions')
+                    if ACTIVE_CONF["MODERATOR_ROLE_ID"] == 0:
+                        await message.reply(f'This command can only be used by a user with the {ACTIVE_CONF["MEMBER_ROLE_NAME"]} role')
+                    else:
+                        await message.reply(f'This command can only be used by a user with the {ACTIVE_CONF["MODERATOR_ROLE_NAME"]} role')
+
             # Change bot name must be performed by admin roles
-            # Sending a bobby message can be performed by anyone
             # Adding a bobby message can be performed by moderator and admin roles
 
     # Add code to get key from file instead of plain text
@@ -241,8 +270,9 @@ def updateConfFile():
 ### This function will check for matching role IDs from a list against the user's role list
 ### Returns True if any of the roles are found and False if none are found
 def checkForUserRoles(userRoleList, roleIdsToBeFound):
-    for id in roleIdsToBeFound:
-        if id in userRoleList:
+    for serverRole in userRoleList:
+        id = serverRole.id
+        if id in roleIdsToBeFound:
             return True
     return False
 
@@ -347,8 +377,29 @@ def changeModeratorRole(message):
     else:
         return False
 
-def addPhrase(phrase):
-    ...
+### This function will add a phrase to the list of available phrases
+def addPhrase(message):
+    global ACTIVE_CONF
+    fullMessage = message.content
+    # Change the bot phrases list conf value and update discord server side
+    commandList = fullMessage.split()
+    # A phrase should be some text following the prefix and command (possibly with whitespace)
+    if len(commandList) >= 3:
+        # the substring used is the pos of the command + the length of the command + 1 which places the start
+        # at the beginning of the phrase (taken to the end)
+        phrase = fullMessage[(fullMessage.find(commandList[1]) + len(commandList[1]) + 1):]
+        # do check for phrase already in list
+        if phrase in ACTIVE_CONF["PHRASES"]:
+            # already in list
+            logging.info(f'Given phrase is already in the list, doing nothing')
+            return True
+        else:
+            logging.info(f'Adding passed in phrase to list of Bobby phrases')
+            ACTIVE_CONF["PHRASES"].append(phrase)
+            updateConfFile()
+            return phrase
+    else:
+        return False # format of command is bad
 
 ### This function will choose a random phrase from the list of available phrases
 def chooseRandomPhrase():
@@ -359,6 +410,6 @@ def chooseRandomPhrase():
     else:
         return False
 
-# Handle main function def for standalone application
+### Handle main function def for standalone application
 if __name__ == '__main__':
     main()

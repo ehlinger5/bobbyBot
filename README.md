@@ -12,8 +12,8 @@ Usage information and a more finished version of this README will be available a
 | **prefix** | Updates the prefix the bot will respond to <br> *There is no sanitization on inputs in this version* | **Discord Administrator Role** |
 | **memberrole** | Updates the Discord role considered a "member" <br> *Only @ roles will have sanitization* | **Discord Administrator Role** |
 | **moderatorrole** | Updates the Discord role considered a "moderator" <br> *Only @ roles will have sanitization* | **Discord Administrator Role** |
-| **addphrase** | Adds a phrase to the list of the bot's available phrases | **Configured Moderator Role** |
 | **randomphrase** | Sends a random phrase from the list of available phrases | **Configured Member Role** |
+| **addphrase** | Adds a phrase to the list of the bot's available phrases | **Configured Moderator Role** |
 ___
 ## Author
 Josh Ehlinger (theEhlien) with support from the [Young Professionals](https://dvc.life/young-professionals) gathering at the Dayton Vineyard Church
